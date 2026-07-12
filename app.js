@@ -1,4 +1,3 @@
-// Seed Data for AssetFlow ERP System
 const INITIAL_DEPARTMENTS = [
   { id: "dept-1", name: "Information Technology", headId: "emp-2", parentId: "", status: "Active" },
   { id: "dept-2", name: "Human Resources", headId: "emp-3", parentId: "", status: "Active" },
