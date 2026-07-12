@@ -351,21 +351,6 @@ def send_notification(emp_id, message):
 # REST API ENDPOINTS
 # ====================================================
 
-# 0. Root & Health Check
-@app.route('/')
-def index():
-    return jsonify({
-        'app': 'AssetFlow ERP API',
-        'version': '1.0.0',
-        'status': 'running',
-        'message': 'Backend is live. Open index.html in your browser to access the frontend.',
-        'docs': 'Use /api/health to check connectivity from the frontend.'
-    })
-
-@app.route('/api/health', methods=['GET'])
-def health():
-    return jsonify({'status': 'ok', 'message': 'AssetFlow API is running'})
-
 # 1. Auth Endpoint
 @app.route('/api/auth/login', methods=['POST'])
 def login():
