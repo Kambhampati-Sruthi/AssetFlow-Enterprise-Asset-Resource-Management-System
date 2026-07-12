@@ -943,12 +943,12 @@
       document.getElementById("forgot-card").style.display = cardType === "forgot" ? "block" : "none";
     }
     // Login submit
-    document.getElementById("login-form-submit").addEventListener("submit", (e) => {
+    document.getElementById("login-form-submit").addEventListener("submit", async (e) => {
       e.preventDefault();
       const email = document.getElementById("login-email").value;
       const pass = document.getElementById("login-password").value;
       
-      const employees = DB.get("employees");
+      const employees = await DB.get("employees");
       const emp = employees.find(x => x.email === email && x.password === pass);
       if (emp) {
         if (emp.status !== "Active") {
@@ -956,15 +956,15 @@
           return;
         }
         sessionStorage.setItem("af_current_user_id", emp.id);
-        setupSession();
-        DB.logAction(emp.name, "Sign In", "Successfully signed into the ERP platform");
-        renderApp();
+        await setupSession();
+        await DB.logAction(emp.name, "Sign In", "Successfully signed into the ERP platform");
+        await renderApp();
       } else {
         alert("Invalid email or password!");
       }
     });
     // Signup submit (creates standard employee role)
-    document.getElementById("signup-form-submit").addEventListener("submit", (e) => {
+    document.getElementById("signup-form-submit").addEventListener("submit", async (e) => {
       e.preventDefault();
       const name = document.getElementById("signup-name").value;
       const email = document.getElementById("signup-email").value;
@@ -973,7 +973,7 @@
         alert("Password must be at least 6 characters.");
         return;
       }
-      const employees = DB.get("employees");
+      const employees = await DB.get("employees");
       const exists = employees.some(x => x.email === email);
       if (exists) {
         alert("Email is already registered!");
@@ -988,11 +988,11 @@
         role: "Employee",
         status: "Active"
       };
-      DB.add("employees", newEmp);
-      DB.logAction(newEmp.name, "Sign Up", "Created employee account via signup");
+      await DB.add("employees", newEmp);
+      await DB.logAction(newEmp.name, "Sign Up", "Created employee account via signup");
       sessionStorage.setItem("af_current_user_id", newEmp.id);
-      setupSession();
-      renderApp();
+      await setupSession();
+      await renderApp();
       showAuthCard("login");
     });
     // Forgot password submit
@@ -1002,13 +1002,13 @@
       showAuthCard("login");
     });
     // Logout handler
-    function handleLogout() {
+    async function handleLogout() {
       if (currentUser) {
-        DB.logAction(currentUser.name, "Sign Out", "Log out successful");
+        await DB.logAction(currentUser.name, "Sign Out", "Log out successful");
       }
       sessionStorage.removeItem("af_current_user_id");
       currentUser = null;
-      setupSession();
+      await setupSession();
     }
   </script>
 </body>
