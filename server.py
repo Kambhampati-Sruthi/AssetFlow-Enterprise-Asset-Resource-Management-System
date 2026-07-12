@@ -1,6 +1,7 @@
 import os
 import sqlite3
 import json
+import uuid
 from datetime import datetime
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -338,13 +339,14 @@ def write_log(user, action, details):
 
 def send_notification(emp_id, message):
     conn = get_db_connection()
+    # Add uuid.uuid4().hex[:6] to guarantee unique IDs in fast loops
+    notif_id = f"notif-{int(datetime.now().timestamp() * 1000)}-{uuid.uuid4().hex[:6]}"
     conn.execute(
         "INSERT INTO notifications VALUES (?, ?, ?, ?, 0)",
-        (f"notif-{int(datetime.now().timestamp() * 1000)}", emp_id, message, datetime.now().isoformat())
+        (notif_id, emp_id, message, datetime.now().isoformat())
     )
     conn.commit()
     conn.close()
-
 # ====================================================
 # REST API ENDPOINTS
 # ====================================================
@@ -1205,18 +1207,28 @@ def get_reports_data():
             'category': cats_static.get(cat_id, cat_id),
             'count': count
         })
-
     # 3. Dept asset worth summaries
     dept_worth = []
+    
+    # Query database for employee-to-department mappings
+    temp_conn = get_db_connection()
+    emp_dept_map = {emp['id']: emp['department_id'] for emp in temp_conn.execute("SELECT id, department_id FROM employees").fetchall()}
+    temp_conn.close()
+
     for d in depts:
         alloc_count = 0
         net_worth = 0.0
         for a in assets:
             a_dict = dict(a)
             alloc = json.loads(a_dict['allocated_to']) if a_dict['allocated_to'] else None
-            if alloc and alloc['id'] == d['id']:
-                alloc_count += 1
-                net_worth += a_dict['acquisition_cost']
+            if alloc:
+                if alloc['id'] == d['id']:
+                    alloc_count += 1
+                    net_worth += a_dict['acquisition_cost']
+                elif alloc['type'] == 'Employee' and emp_dept_map.get(alloc['id']) == d['id']:
+                    alloc_count += 1
+                    net_worth += a_dict['acquisition_cost']
+
         dept_worth.append({
             'name': d['name'],
             'count': alloc_count,
