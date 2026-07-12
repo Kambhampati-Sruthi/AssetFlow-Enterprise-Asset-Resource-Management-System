@@ -1,0 +1,21 @@
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local SQLite databases
+assetflow.db
+assetflow.db-journal
+
+# Local OS files
+.DS_Store
+Thumbs.db
+
+# VS Code or local IDE settings
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
